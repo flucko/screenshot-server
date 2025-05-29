@@ -37,13 +37,26 @@ Example intervals:
 - `120` - Every 2 hours
 - `1440` - Once daily
 
+## Using from Docker Hub
+
+Update `docker-compose.yml` to use the pre-built image:
+
+```yaml
+services:
+  screenshot-server:
+    image: flucko/screenshot-server:latest  # Instead of 'build: .'
+    ports:
+      - "8080:80"
+    # ... rest of configuration
+```
+
 ## Manual Docker Build
 
 ```bash
 # Build the image
 docker build -t screenshot-server .
 
-# Run the container
+## Run the container
 docker run -d \
   -p 8080:80 \
   -e TARGET_URL="http://192.168.0.121:8180/" \
@@ -70,67 +83,5 @@ docker run -d \
 This repository includes automated Docker builds using GitHub Actions. On every push to the `main` branch:
 - Builds multi-architecture images (amd64 and arm64)
 - Tags with branch name, commit SHA, and `latest`
-- Pushes to Docker Hub automatically
+- Pushes to Docker Hub automatically: flucko/screenshot-server:latest
 
-### Setup GitHub Actions
-
-1. Go to your repository Settings → Secrets and variables → Actions
-2. Add the following secrets:
-   - `DOCKER_USERNAME`: Your Docker Hub username
-   - `DOCKER_TOKEN`: Your Docker Hub access token (create at https://hub.docker.com/settings/security)
-
-## Pushing to Docker Registry
-
-### Docker Hub (Manual)
-
-```bash
-# Build and tag the image
-docker build -t screenshot-server .
-docker tag screenshot-server:latest yourusername/screenshot-server:latest
-
-# Login to Docker Hub
-docker login
-
-# Push the image
-docker push yourusername/screenshot-server:latest
-```
-
-### Private Registry
-
-```bash
-# Tag for private registry
-docker tag screenshot-server:latest your-registry.com/screenshot-server:latest
-
-# Login to private registry
-docker login your-registry.com
-
-# Push the image
-docker push your-registry.com/screenshot-server:latest
-```
-
-### AWS ECR
-
-```bash
-# Get login token
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789.dkr.ecr.us-east-1.amazonaws.com
-
-# Create repository (if needed)
-aws ecr create-repository --repository-name screenshot-server
-
-# Tag and push
-docker tag screenshot-server:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/screenshot-server:latest
-docker push 123456789.dkr.ecr.us-east-1.amazonaws.com/screenshot-server:latest
-```
-
-### Using from Registry
-
-Update `docker-compose.yml` to use the registry image:
-
-```yaml
-services:
-  screenshot-server:
-    image: yourusername/screenshot-server:latest  # Instead of 'build: .'
-    ports:
-      - "8080:80"
-    # ... rest of configuration
-```

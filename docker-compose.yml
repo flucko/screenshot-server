@@ -6,9 +6,10 @@ services:
     ports:
       - "8080:80"
     environment:
-      - TARGET_URL=http://192.168.0.121:8180/
+      - TARGET_URL=http://192.168.0.1:8080/
       - RESOLUTION=1024x768
       - SCREENSHOT_INTERVAL=60
+      - PAGE_LOAD_DELAY=10
     restart: unless-stopped
     volumes:
       - screenshot-data:/var/www/html

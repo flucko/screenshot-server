@@ -13,6 +13,7 @@ def capture_screenshot():
     target_url = os.environ.get('TARGET_URL', 'http://192.168.0.121:8180/')
     resolution = os.environ.get('RESOLUTION', '1024x768')
     width, height = map(int, resolution.split('x'))
+    page_load_delay = int(os.environ.get('PAGE_LOAD_DELAY', '10'))
     
     # Setup Chrome options
     chrome_options = Options()
@@ -32,7 +33,7 @@ def capture_screenshot():
         driver.get(target_url)
         
         # Wait for page to load
-        time.sleep(10)
+        time.sleep(page_load_delay)
         
         # Set window size
         driver.set_window_size(width, height)
