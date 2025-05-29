@@ -1,28 +1,21 @@
-FROM python:3.9-slim
+FROM python:3.9-alpine
 
-# Install dependencies for Chromium and nginx
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    nginx \
-    cron \
-    supervisor \
-    ca-certificates \
-    curl \
+# Install dependencies
+RUN apk add --no-cache \
     chromium \
-    chromium-driver \
+    chromium-chromedriver \
+    nginx \
+    supervisor \
+    bash \
     tzdata \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python dependencies
-RUN pip install selenium pillow
+    && pip install --no-cache-dir selenium pillow
 
 # Create necessary directories
 RUN mkdir -p /app /var/www/html /var/log/supervisor
 
 # Copy application files
 COPY screenshot.py /app/
-COPY nginx.conf /etc/nginx/sites-available/default
+COPY nginx.conf /etc/nginx/http.d/default.conf
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY start.sh /app/
 

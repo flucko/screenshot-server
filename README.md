@@ -24,6 +24,8 @@ Edit the environment variables in `docker-compose.yml`:
 - `TARGET_URL`: The webpage to capture (default: `http://192.168.0.121:8180/`)
 - `RESOLUTION`: Screenshot resolution (default: `1024x768`)
 - `SCREENSHOT_INTERVAL`: Screenshot frequency in minutes (default: `60`)
+- `PAGE_LOAD_DELAY`: Wait time in seconds before taking screenshot (default: `10`)
+- `TZ`: Timezone for timestamps (default: `America/Toronto`)
 
 Example resolutions for older iPads:
 - iPad 1/2: `1024x768`
@@ -39,12 +41,18 @@ Example intervals:
 
 ## Using from Docker Hub
 
-Update `docker-compose.yml` to use the pre-built image:
+Three image variants are available on Docker Hub:
+
+- `flucko/screenshot-server:latest` - Standard Debian-based image (~300MB)
+- `flucko/screenshot-server:latest-alpine` - Alpine Linux variant (~180MB)
+- `flucko/screenshot-server:latest-slim` - Optimized multi-stage build (~150MB)
+
+Update `docker-compose.yml` to use a pre-built image:
 
 ```yaml
 services:
   screenshot-server:
-    image: flucko/screenshot-server:latest  # Instead of 'build: .'
+    image: flucko/screenshot-server:latest-slim  # Or :latest, :latest-alpine
     ports:
       - "8080:80"
     # ... rest of configuration
@@ -62,6 +70,8 @@ docker run -d \
   -e TARGET_URL="http://192.168.0.121:8180/" \
   -e RESOLUTION="1024x768" \
   -e SCREENSHOT_INTERVAL="60" \
+  -e PAGE_LOAD_DELAY="10" \
+  -e TZ="America/Toronto" \
   screenshot-server
 ```
 
@@ -78,10 +88,27 @@ docker run -d \
 - `screenshot_YYYYMMDD_HHMMSS.png` - Timestamped screenshots
 - `index.html` - Auto-refreshing viewer page
 
+## Image Size Optimization
+
+The default Docker image is ~300MB due to Chromium and dependencies. For a smaller footprint (~150MB), use the Alpine-based optimized build:
+
+```bash
+# Use the optimized build
+docker-compose -f docker-compose.optimized.yml up -d
+```
+
+This uses:
+- Alpine Linux base (5MB vs 120MB)
+- Multi-stage build to exclude build dependencies
+- Optimized package installation
+
 ## CI/CD with GitHub Actions
 
 This repository includes automated Docker builds using GitHub Actions. On every push to the `main` branch:
-- Builds multi-architecture images (amd64 and arm64)
-- Tags with branch name, commit SHA, and `latest`
-- Pushes to Docker Hub automatically: flucko/screenshot-server:latest
+- Builds multi-architecture images (amd64 and arm64) for all three variants
+- Creates the following tags for each variant:
+  - `flucko/screenshot-server:latest` (standard build)
+  - `flucko/screenshot-server:latest-alpine` (Alpine variant)
+  - `flucko/screenshot-server:latest-slim` (optimized build)
+- Also creates branch and SHA-based tags for versioning
 

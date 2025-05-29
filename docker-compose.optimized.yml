@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   screenshot-server:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.optimized
     ports:
       - "8080:80"
     environment:

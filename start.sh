@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Set timezone from environment variable (default: America/Toronto)
+TZ=${TZ:-America/Toronto}
+export TZ
+ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
+echo $TZ > /etc/timezone
+
 # Get screenshot interval from environment variable (default: 60 minutes)
 SCREENSHOT_INTERVAL=${SCREENSHOT_INTERVAL:-60}
 
