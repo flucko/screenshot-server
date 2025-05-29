@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  screenshot-server:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      - TARGET_URL=http://192.168.0.121:8180/
+      - RESOLUTION=1024x768
+      - SCREENSHOT_INTERVAL=60
+    restart: unless-stopped
+    volumes:
+      - screenshot-data:/var/www/html
+
+volumes:
+  screenshot-data:
