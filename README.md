@@ -1,5 +1,8 @@
 # Screenshot Server for Legacy Devices
 
+[![Docker Build and Push](https://github.com/flucko/screenshot-server/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/flucko/screenshot-server/actions/workflows/docker-publish.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/flucko/screenshot-server)](https://hub.docker.com/r/flucko/screenshot-server)
+
 This Docker container captures screenshots of a webpage at configurable intervals and serves them via a simple web interface, perfect for displaying on older devices that can't handle modern web technologies.
 
 ## Quick Start
@@ -62,9 +65,23 @@ docker run -d \
 - `screenshot_YYYYMMDD_HHMMSS.png` - Timestamped screenshots
 - `index.html` - Auto-refreshing viewer page
 
+## CI/CD with GitHub Actions
+
+This repository includes automated Docker builds using GitHub Actions. On every push to the `main` branch:
+- Builds multi-architecture images (amd64 and arm64)
+- Tags with branch name, commit SHA, and `latest`
+- Pushes to Docker Hub automatically
+
+### Setup GitHub Actions
+
+1. Go to your repository Settings → Secrets and variables → Actions
+2. Add the following secrets:
+   - `DOCKER_USERNAME`: Your Docker Hub username
+   - `DOCKER_TOKEN`: Your Docker Hub access token (create at https://hub.docker.com/settings/security)
+
 ## Pushing to Docker Registry
 
-### Docker Hub
+### Docker Hub (Manual)
 
 ```bash
 # Build and tag the image
