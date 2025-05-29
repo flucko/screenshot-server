@@ -9,9 +9,6 @@ echo $TZ > /etc/timezone
 # Get screenshot interval from environment variable (default: 60 minutes)
 SCREENSHOT_INTERVAL=${SCREENSHOT_INTERVAL:-60}
 
-# Create initial screenshot on startup
-python /app/screenshot.py
-
 # Convert interval to cron expression
 if [ "$SCREENSHOT_INTERVAL" -lt 60 ]; then
     # For intervals less than 60 minutes, run every N minutes
@@ -31,11 +28,11 @@ fi
 echo "Screenshot interval: $SCREENSHOT_INTERVAL minutes"
 echo "Cron expression: $CRON_EXPR"
 
+# Create log file if it doesn't exist
+touch /var/log/cron.log
+
 # Setup cron job
 echo "$CRON_EXPR python /app/screenshot.py >> /var/log/cron.log 2>&1" | crontab -
 
-# Start cron daemon
-cron
-
-# Keep the script running
-tail -f /var/log/cron.log
+# Start cron daemon in foreground
+exec cron -f
