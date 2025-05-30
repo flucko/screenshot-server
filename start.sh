@@ -43,14 +43,26 @@ touch /var/log/cron.log
 echo "Cron jobs configured:"
 crontab -l
 
-# Start cron service (not in foreground to avoid PID 1 issues)
-service cron start
+# Start cron daemon directly (more compatible across environments)
+echo "Starting cron daemon..."
+/usr/sbin/cron
+
+# Give cron a moment to start
+sleep 2
 
 # Check if cron is running
 if ! pgrep -x "cron" > /dev/null; then
-    echo "Cron failed to start"
-    exit 1
+    echo "Cron failed to start, trying alternative method..."
+    # Try running cron in background
+    cron &
+    sleep 2
+    if ! pgrep -x "cron" > /dev/null; then
+        echo "ERROR: Cron still failed to start"
+        exit 1
+    fi
 fi
+
+echo "Cron daemon started successfully"
 
 # Keep the script running by tailing the log
 exec tail -f /var/log/cron.log
