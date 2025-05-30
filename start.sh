@@ -31,8 +31,26 @@ echo "Cron expression: $CRON_EXPR"
 # Create log file if it doesn't exist
 touch /var/log/cron.log
 
-# Setup cron job
-echo "$CRON_EXPR python /app/screenshot.py >> /var/log/cron.log 2>&1" | crontab -
+# Setup cron job with proper environment
+(
+    echo "SHELL=/bin/bash"
+    echo "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    echo "TZ=$TZ"
+    echo "$CRON_EXPR python /app/screenshot.py >> /var/log/cron.log 2>&1"
+) | crontab -
 
-# Start cron daemon in foreground
-exec cron -f
+# List cron jobs for debugging
+echo "Cron jobs configured:"
+crontab -l
+
+# Start cron service (not in foreground to avoid PID 1 issues)
+service cron start
+
+# Check if cron is running
+if ! pgrep -x "cron" > /dev/null; then
+    echo "Cron failed to start"
+    exit 1
+fi
+
+# Keep the script running by tailing the log
+exec tail -f /var/log/cron.log
