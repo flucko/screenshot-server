@@ -4,7 +4,7 @@ services:
   screenshot-server:
     build:
       context: .
-      dockerfile: Dockerfile.optimized
+      dockerfile: Dockerfile.alpine
     ports:
       - "8080:80"
     environment:
