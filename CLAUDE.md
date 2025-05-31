@@ -61,8 +61,8 @@ Two optimized variants are built automatically:
 - **Alpine-based**: Smaller image size, sufficient for most deployments
 
 **Tags generated:**
-- Releases: `v1.2.3`, `v1.2.3-alpine`, `v1.2`, `v1.2-alpine`, `v1`, `v1-alpine`  
-- Latest: `latest` (Ubuntu), `alpine` (Alpine)
+- Releases: `v1.2.3`, `v1.2.3-alpine`
+- Latest: `latest` (Ubuntu), `alpine` (Alpine)  
 - Branches: `main-abc123`, `main-abc123-alpine`
 
 Uses matrix strategy for parallel builds across amd64/arm64 architectures.
@@ -73,3 +73,7 @@ Uses matrix strategy for parallel builds across amd64/arm64 architectures.
 2. **Wrong timezone**: Set `TZ` environment variable in docker-compose.yml
 3. **Page not fully loaded**: Increase `PAGE_LOAD_DELAY` value
 4. **Cron not running**: Check `exec cron -f` is used in start.sh (foreground mode)
+
+## Memories
+
+- Remember the release tags for future pushes

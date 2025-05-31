@@ -54,8 +54,6 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && matrix.variant == 'ubuntu' }}
             type=raw,value=alpine,enable=${{ github.ref == 'refs/heads/main' && matrix.variant == 'alpine' }}
             type=sha,prefix={{branch}}-,format=short,enable=${{ github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/') }}
