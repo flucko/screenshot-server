@@ -8,13 +8,18 @@ RUN apk add --no-cache \
     supervisor \
     bash \
     tzdata \
-    && pip install --no-cache-dir selenium pillow
+    gcc \
+    musl-dev \
+    linux-headers \
+    && pip install --no-cache-dir selenium pillow psutil \
+    && apk del gcc musl-dev linux-headers
 
 # Create necessary directories
 RUN mkdir -p /app /var/www/html /var/log/supervisor
 
 # Copy application files
 COPY screenshot.py /app/
+COPY chrome_manager.py /app/
 COPY nginx.conf /etc/nginx/http.d/default.conf
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY start.sh /app/

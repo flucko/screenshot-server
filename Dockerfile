@@ -15,13 +15,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-RUN pip install selenium pillow
+RUN pip install selenium pillow psutil
 
 # Create necessary directories
 RUN mkdir -p /app /var/www/html /var/log/supervisor
 
 # Copy application files
 COPY screenshot.py /app/
+COPY chrome_manager.py /app/
 COPY nginx.conf /etc/nginx/sites-available/default
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY start.sh /app/

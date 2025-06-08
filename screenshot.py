@@ -1,12 +1,50 @@
 #!/usr/bin/env python3
 import os
 import time
+import json
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from PIL import Image
 import io
+import logging
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - Screenshot - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+def get_persistent_chrome_driver():
+    """Try to connect to persistent Chrome instance managed by chrome_manager"""
+    try:
+        # Check if chrome manager is running
+        status_file = '/tmp/chrome_status.json'
+        if not os.path.exists(status_file):
+            return None
+            
+        with open(status_file, 'r') as f:
+            status = json.load(f)
+            
+        if status.get('status') != 'running':
+            logger.info("Chrome manager not in running state")
+            return None
+        
+        # Connect to existing Chrome instance
+        chrome_options = Options()
+        chrome_options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+        
+        # Create driver connected to existing instance
+        driver = webdriver.Chrome(options=chrome_options)
+        logger.info("Connected to persistent Chrome instance")
+        return driver
+        
+    except Exception as e:
+        logger.warning(f"Could not connect to persistent Chrome: {e}")
+        return None
 
 def capture_screenshot():
     # Get environment variables
@@ -14,22 +52,36 @@ def capture_screenshot():
     resolution = os.environ.get('RESOLUTION', '1024x768')
     width, height = map(int, resolution.split('x'))
     page_load_delay = int(os.environ.get('PAGE_LOAD_DELAY', '10'))
+    keep_chrome_open = os.environ.get('KEEP_CHROME_OPEN', 'false').lower() == 'true'
+    
+    driver = None
+    using_persistent = False
+    
+    # Try to use persistent Chrome if enabled
+    if keep_chrome_open:
+        driver = get_persistent_chrome_driver()
+        if driver:
+            using_persistent = True
+            logger.info("Using persistent Chrome instance")
+    
+    # Fall back to creating new Chrome instance
+    if not driver:
+        logger.info("Creating new Chrome instance")
+        # Setup Chrome options
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument(f'--window-size={width},{height}')
 
-    # Setup Chrome options
-    chrome_options = Options()
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-dev-shm-usage')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument(f'--window-size={width},{height}')
-
-    # Initialize driver with Chromium
-    service = Service('/usr/bin/chromedriver')
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+        # Initialize driver with Chromium
+        service = Service('/usr/bin/chromedriver')
+        driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
         # Load the webpage
-        print(f"Loading {target_url}...")
+        logger.info(f"Loading {target_url}...")
         driver.get(target_url)
 
         # Wait for page to load
@@ -175,13 +227,19 @@ def capture_screenshot():
         with open('/var/www/html/index.html', 'w') as f:
             f.write(index_content)
 
-        print(f"Screenshot saved successfully at {timestamp}")
+        logger.info(f"Screenshot saved successfully at {timestamp}")
 
     except Exception as e:
-        print(f"Error capturing screenshot: {e}")
+        logger.error(f"Error capturing screenshot: {e}")
+        raise
 
     finally:
-        driver.quit()
+        # Only quit driver if not using persistent Chrome
+        if not using_persistent:
+            logger.info("Closing Chrome instance")
+            driver.quit()
+        else:
+            logger.info("Keeping Chrome instance open for next screenshot")
 
 if __name__ == '__main__':
     capture_screenshot()

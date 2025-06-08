@@ -13,6 +13,10 @@ services:
       - SCREENSHOT_INTERVAL=60
       - PAGE_LOAD_DELAY=10
       - TZ=America/Toronto
+      # Chrome persistence settings (optional)
+      - KEEP_CHROME_OPEN=false  # Set to true to enable persistent Chrome
+      - CHROME_MAX_MEMORY_MB=1024  # Max memory before Chrome restart
+      - CHROME_RESTART_HOURS=24  # Hours before scheduled Chrome restart
     restart: unless-stopped
     volumes:
       - screenshot-data:/var/www/html

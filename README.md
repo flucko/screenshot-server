@@ -27,6 +27,14 @@ Edit the environment variables in `docker-compose.yml`:
 - `PAGE_LOAD_DELAY`: Wait time in seconds before taking screenshot (default: `10`)
 - `TZ`: Timezone for timestamps (default: `America/Toronto`)
 
+### Chrome Persistence Mode (Optional)
+
+To reduce API calls and improve performance, you can enable Chrome persistence mode which keeps the browser open between screenshots:
+
+- `KEEP_CHROME_OPEN`: Enable persistent Chrome mode (default: `false`)
+- `CHROME_MAX_MEMORY_MB`: Maximum memory usage before Chrome restart (default: `1024`)
+- `CHROME_RESTART_HOURS`: Hours before scheduled Chrome restart (default: `24`)
+
 Example resolutions for older iPads:
 - iPad 1/2: `1024x768`
 - iPad 3/4: `2048x1536`
@@ -82,6 +90,15 @@ docker run -d \
 3. Auto-refreshing HTML page displays the screenshot
 4. Optimized for low-bandwidth and legacy browsers
 
+### Chrome Persistence Mode
+
+When `KEEP_CHROME_OPEN=true` is set:
+1. A Chrome Manager service starts and maintains a persistent browser instance
+2. Screenshots reuse the existing browser connection, reducing overhead
+3. Chrome automatically restarts after 24 hours or if memory limits are exceeded
+4. Memory usage is monitored and logged when it increases
+5. Falls back to normal operation if the persistent instance fails
+
 ## Files
 
 - `latest.png` - Most recent screenshot
@@ -111,4 +128,28 @@ This repository includes automated Docker builds using GitHub Actions. On every 
   - `flucko/screenshot-server:latest-alpine` (Alpine variant)
   - `flucko/screenshot-server:latest-slim` (optimized build)
 - Also creates branch and SHA-based tags for versioning
+
+## Troubleshooting
+
+### Chrome Persistence Issues
+
+If you're having issues with Chrome persistence mode:
+
+1. **Check Chrome Manager logs:**
+   ```bash
+   docker-compose logs | grep "Chrome Manager"
+   ```
+
+2. **Verify Chrome status:**
+   ```bash
+   docker exec <container-id> cat /tmp/chrome_status.json
+   ```
+
+3. **Monitor memory usage:**
+   Look for memory logs indicating when Chrome memory increases or restarts occur.
+
+4. **Common issues:**
+   - If Chrome crashes frequently, try increasing `CHROME_MAX_MEMORY_MB`
+   - For pages with memory leaks, decrease `CHROME_RESTART_HOURS` 
+   - Ensure the target URL is accessible from within the container
 
