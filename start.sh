@@ -6,6 +6,8 @@ export TZ
 ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
 echo $TZ > /etc/timezone
 
+printenv | grep -v "no_proxy" > /etc/environment
+
 # Get screenshot interval from environment variable (default: 60 minutes)
 SCREENSHOT_INTERVAL=${SCREENSHOT_INTERVAL:-60}
 
@@ -36,7 +38,7 @@ touch /var/log/cron.log
     echo "SHELL=/bin/bash"
     echo "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
     echo "TZ=$TZ"
-    echo "$CRON_EXPR python /app/screenshot.py >> /var/log/cron.log 2>&1"
+    echo "$CRON_EXPR source /etc/environment; python /app/screenshot.py >> /var/log/cron.log 2>&1"
 ) | crontab -
 
 # List cron jobs for debugging
