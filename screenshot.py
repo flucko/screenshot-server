@@ -10,6 +10,8 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from PIL import Image
 import io
 import logging
+import config
+import glob
 
 # Setup logging
 logging.basicConfig(
@@ -47,12 +49,11 @@ def get_persistent_chrome_driver():
         return None
 
 def capture_screenshot():
-    # Get environment variables
-    target_url = os.environ.get('TARGET_URL', 'http://192.168.0.121:8180/')
-    resolution = os.environ.get('RESOLUTION', '1024x768')
-    width, height = map(int, resolution.split('x'))
-    page_load_delay = int(os.environ.get('PAGE_LOAD_DELAY', '10'))
-    keep_chrome_open = os.environ.get('KEEP_CHROME_OPEN', 'false').lower() == 'true'
+    # Get configuration
+    target_url = config.TARGET_URL
+    width, height = config.WIDTH, config.HEIGHT
+    page_load_delay = config.PAGE_LOAD_DELAY
+    keep_chrome_open = config.KEEP_CHROME_OPEN
     
     driver = None
     using_persistent = False
@@ -105,6 +106,16 @@ def capture_screenshot():
         latest_path = '/var/www/html/latest.png'
         with open(latest_path, 'wb') as f:
             f.write(screenshot)
+
+        # Clean up old timestamped screenshots
+        try:
+            old_screenshots = glob.glob('/var/www/html/screenshot_*.png')
+            for old_file in old_screenshots:
+                if old_file != timestamped_path:
+                    os.remove(old_file)
+                    logger.info(f"Deleted old screenshot: {old_file}")
+        except Exception as cleanup_err:
+            logger.error(f"Error cleaning up old screenshots: {cleanup_err}")
 
         # Create a simple index.html
         index_content = f'''<!DOCTYPE html>
@@ -235,10 +246,10 @@ def capture_screenshot():
 
     finally:
         # Only quit driver if not using persistent Chrome
-        if not using_persistent:
+        if not using_persistent and driver:
             logger.info("Closing Chrome instance")
             driver.quit()
-        else:
+        elif using_persistent:
             logger.info("Keeping Chrome instance open for next screenshot")
 
 if __name__ == '__main__':

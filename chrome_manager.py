@@ -12,6 +12,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import WebDriverException
 import logging
+import config
 
 # Setup logging
 logging.basicConfig(
@@ -30,16 +31,16 @@ class ChromeManager:
         self.status_file = '/tmp/chrome_status.json'
         self.running = True
         
-        # Configuration from environment
-        self.keep_open = os.environ.get('KEEP_CHROME_OPEN', 'false').lower() == 'true'
-        self.max_memory_mb = int(os.environ.get('CHROME_MAX_MEMORY_MB', '1024'))
-        self.restart_hours = int(os.environ.get('CHROME_RESTART_HOURS', '24'))
-        self.target_url = os.environ.get('TARGET_URL', 'http://192.168.0.121:8180/')
-        self.page_load_delay = int(os.environ.get('PAGE_LOAD_DELAY', '10'))
+        # Configuration from config
+        self.keep_open = config.KEEP_CHROME_OPEN
+        self.max_memory_mb = config.CHROME_MAX_MEMORY_MB
+        self.restart_hours = config.CHROME_RESTART_HOURS
+        self.target_url = config.TARGET_URL
+        self.page_load_delay = config.PAGE_LOAD_DELAY
         
         # Chrome configuration
-        self.resolution = os.environ.get('RESOLUTION', '1024x768')
-        self.width, self.height = map(int, self.resolution.split('x'))
+        self.resolution = config.RESOLUTION
+        self.width, self.height = config.WIDTH, config.HEIGHT
         
     def setup_chrome_options(self):
         """Configure Chrome options for persistent mode"""
