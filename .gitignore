@@ -11,11 +11,13 @@ ENV/
 # Docker
 *.log
 
-# IDE
+# IDE / Tools
 .vscode/
 .idea/
 *.swp
 *.swo
+.ropeproject/
+.claude/
 
 # OS
 .DS_Store
